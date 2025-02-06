@@ -5,6 +5,9 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.bluesoftware.city_connect_pro.validation.ExistsByUsername;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -39,6 +42,7 @@ public class Usuario {
 
     @Column(nullable = false)
     @NotBlank(message = "La contrasenia no puede estar vacía")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Size(min = 8, message = "La contrasenia debe tener al menos 8 caracteres")
     private String password;
 
@@ -47,6 +51,12 @@ public class Usuario {
 
     @Size(max = 255, message = "La dirección no puede tener más de 255 caracteres")
     private String direccion;
+
+    @Column(nullable = false, unique = true)
+    @NotBlank(message = "El nombre de usuario no puede estar vacío")
+    @Size(min = 4, max = 20, message = "El nombre de usuario debe tener entre 4 y 20 caracteres")
+    @ExistsByUsername(message = "El nombre de usuario ya existe en el sistema. Escoja otro.")
+    private String username;
 
     @Column(nullable = false, unique = true)
     @NotBlank(message = "El email no puede estar vacío")

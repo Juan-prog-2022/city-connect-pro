@@ -9,7 +9,9 @@ public interface UsuarioService {
     List<Usuario> listarUsuarios();
     Optional<Usuario> buscarUsuarioPorId(Long id);
     Usuario guardarUsuario(Usuario usuario);
+    Usuario actualizarUsuario(Long id, Usuario usuarioDetalles);
     void eliminarUsuario(Long id);
     Usuario buscarPorEmail(String email);
     Usuario buscarPorDni(String dni);
+    boolean existsByUsername(String username);
 }

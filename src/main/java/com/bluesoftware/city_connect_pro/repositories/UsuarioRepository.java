@@ -8,6 +8,8 @@ import com.bluesoftware.city_connect_pro.entities.Usuario;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
+    Optional<Usuario> findByUsername(String username);
     Optional<Usuario> findByEmail(String email);
     Optional<Usuario> findByDni(String dni);
+    boolean existsByUsername(String username);
 }
