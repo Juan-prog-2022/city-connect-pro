@@ -1,23 +1,15 @@
 package com.bluesoftware.city_connect_pro.filter;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.bluesoftware.city_connect_pro.security.SimpleGrantedAuthorityJsonCreator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,11 +56,12 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             // Se obtiene los roles del token
             Object authoritiesClaims = claims.get("authorities");
 
-            Collection<? extends GrantedAuthority> authorities = Arrays.asList(
-                new ObjectMapper()
-                .addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)
-                .convertValue(authoritiesClaims.toString().getBytes(), SimpleGrantedAuthority[].class));
-            
+            @SuppressWarnings("unchecked")
+            Collection<SimpleGrantedAuthority> authorities = ((List<Map<String, String>>) authoritiesClaims).stream()
+                    .map(m -> new SimpleGrantedAuthority(m.get("authority")))
+                    .toList();
+
+
             // Se crea el objeto de autenticación
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, null, authorities);
 

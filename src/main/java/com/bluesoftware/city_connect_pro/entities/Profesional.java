@@ -34,6 +34,10 @@ public class Profesional {
     @Size(max = 15, message = "El teléfono no puede tener más de 15 caracteres")
     private String telefono;
 
+    @Column(nullable = false, unique = true)
+    @NotBlank(message = "El DNI no puede estar vacío")
+    private String dni;
+
     @NotBlank(message = "El email no puede estar vacío")
     @Email(message = "Debe ser un email válido")
     @Column(nullable = false, unique = true)
@@ -77,12 +81,8 @@ public class Profesional {
 
     private String videoPresentacion;
 
-    @OneToOne
-    @JoinColumn(name = "usuario_id")
-    private Usuario usuario;
-
     @OneToMany(mappedBy = "profesional", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("fecha DESC")
+    @OrderBy("fechaResenia DESC")
     private List<Resenia> resenias;
 
     @Enumerated(EnumType.STRING)

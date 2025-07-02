@@ -34,22 +34,33 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests((authz) -> authz
-                // 🔹 Permitir registro y consulta de usuarios
-                .requestMatchers(HttpMethod.GET, "/api/usuarios").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/usuarios/registrarse").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/citas").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/citas").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/profesionales").permitAll()
-                .requestMatchers(HttpMethod.DELETE, "/api/usuarios/{id}").hasRole("ADMINISTRADOR")
+                        // Rutas públicas
+                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios/registrarse").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // 🔹 Permitir CORS preflight
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Profesionales - acceso público para GET (listar y buscar)
+                        .requestMatchers(HttpMethod.GET, "/api/profesionales/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/profesionales").authenticated()
+                        // Profesionales - solo ADMIN puede actualizar, eliminar
+                        .requestMatchers(HttpMethod.PUT, "/api/profesionales/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/profesionales/**").hasRole("ADMIN")
 
-                // 🔹 Proteger creación de Admins (requiere autenticación y rol ADMIN)
-                .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRADOR")
+                        // Usuarios - autenticación requerida para ver y modificar
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").authenticated()
 
-                // 🔹 Cualquier otra solicitud requiere autenticación
-                .anyRequest().authenticated())
+                        // Citas - autenticación requerida para ver y modificar
+                        .requestMatchers(HttpMethod.GET, "/api/citas/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/citas").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/citas/**").authenticated()
+
+                        // Usuarios - solo ADMIN puede eliminar usuarios y crear usuarios directamente
+                        .requestMatchers(HttpMethod.DELETE, "/api/usuarios/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMIN")
+                        // 🔹 Cualquier otra solicitud requiere autenticación
+                        .anyRequest().authenticated())
 
                 // 🔹 Configurar autenticación basada en token
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))

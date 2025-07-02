@@ -1,6 +1,7 @@
 package com.bluesoftware.city_connect_pro.entities;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -63,12 +65,15 @@ public class Usuario {
     @Email(message = "Debe proporcionar un email válido")
     private String email;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TipoUsuario tipoUsuario;
+    private boolean isAdmin = false;
 
+    @NotNull
     @Column(nullable = false)
     private Boolean activo = true;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "usuario_roles", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "rol_id"))
+    private List<Role> roles;
 
     @CreationTimestamp
     @Column(updatable = false)

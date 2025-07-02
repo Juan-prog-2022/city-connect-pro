@@ -1,3 +1,4 @@
+
 package com.bluesoftware.city_connect_pro.services;
 
 import java.util.List;
@@ -36,17 +37,20 @@ public class JpaUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("La cuenta está desactivada. Contacte con el administrador.");
         }
 
-        // Convertir el enum de tipo de usuario en un GrantedAuthority
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getTipoUsuario().name());
+        // Mapear los Roles de usuario y convertirlos en una lista de GrantedAuthority
+        List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
+                .map(rol -> new SimpleGrantedAuthority(rol.getName()))
+                .toList();
+
 
         return new org.springframework.security.core.userdetails.User(
-            user.getUsername(),
-            user.getPassword(),
-            user.getActivo(),
-            true,
-            true,
-            true,
-            List.of(authority) // Convertimos a lista porque necesita Collection<GrantedAuthority>
-        );  
+                user.getUsername(),
+                user.getPassword(),
+                user.getActivo(),
+                true,
+                true,
+                true,
+                authorities // lista porque necesita Collection<GrantedAuthority>
+        );
     }
 }

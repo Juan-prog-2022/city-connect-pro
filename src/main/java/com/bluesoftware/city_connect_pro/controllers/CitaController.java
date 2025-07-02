@@ -1,81 +1,124 @@
 package com.bluesoftware.city_connect_pro.controllers;
 
+import com.bluesoftware.city_connect_pro.dtos.CitaResponseDTO;
 import com.bluesoftware.city_connect_pro.entities.Cita;
+import com.bluesoftware.city_connect_pro.entities.Profesional;
+import com.bluesoftware.city_connect_pro.entities.Usuario;
+import com.bluesoftware.city_connect_pro.mapper.CitaMapper;
 import com.bluesoftware.city_connect_pro.services.CitaService;
+import com.bluesoftware.city_connect_pro.services.ProfesionalService;
+import com.bluesoftware.city_connect_pro.services.UsuarioService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/citas")
-@CrossOrigin(origins = "*") // Permite peticiones desde cualquier origen
 public class CitaController {
 
     @Autowired
     private CitaService citaService;
 
-    // 🔹 Obtener todas las citas
-    @Operation(summary = "Listar todas las citas")
+    @Autowired
+    private UsuarioService usuarioService;
+
+    @Autowired
+    private ProfesionalService profesionalService;
+
+    @Autowired
+    private CitaMapper citaMapper;
+
+    // 🔹 Obtener todas las citas (solo para admin)
+    @Operation(summary = "Listar todas las citas (ADMIN)")
     @GetMapping
-    public ResponseEntity<List<Cita>> listarCitas() {
-        return ResponseEntity.ok(citaService.listarCitas());
+    public ResponseEntity<List<CitaResponseDTO>> listarCitas() {
+        List<Cita> citas = citaService.listarCitas();
+
+        // Mapear lista de entidades a lista de DTOs
+        List<CitaResponseDTO> dtos = citas.stream()
+                .map(citaMapper::citaToCitaResponseDTO)
+                .toList();
+
+        return ResponseEntity.ok(dtos);
     }
 
-    // 🔹 Obtener una cita por ID
-    @Operation(summary = "Obtener una cita por ID")
-    @GetMapping("/{id}")
-    public ResponseEntity<Cita> obtenerPorId(@PathVariable Long id) {
-        Optional<Cita> cita = citaService.buscarCitaPorId(id);
-        return cita.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    // 🔹 Listar citas del usuario autenticado (ya sea cliente o profesional)
+    @Operation(summary = "Listar mis citas según rol")
+    @GetMapping("/mis-citas")
+    public ResponseEntity<?> obtenerMisCitas(Authentication auth) {
+        Usuario usuario = obtenerUsuarioAutenticado(auth);
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
+        }
+
+        List<Cita> citas;
+        if (tieneRolAdmin(auth)) {
+            citas = citaService.listarCitas();
+        } else if (tieneRolProfesional(auth)) {
+            citas = citaService.buscarPorProfesional(usuario.getId());
+        } else {
+            citas = citaService.buscarPorUsuario(usuario.getId());
+        }
+        return ResponseEntity.ok(citas);
     }
 
-    // 🔹 Crear una nueva cita
-    @Operation(summary = "Crear una nueva cita")
     @PostMapping
-    public ResponseEntity<Cita> crearCita(@RequestBody Cita cita) {
+    public ResponseEntity<?> crearCita(@Valid @RequestBody Cita cita, Authentication auth) {
+        Usuario usuario = obtenerUsuarioAutenticado(auth);
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
+        }
+
+        cita.setUsuario(usuario);
+
+        if (cita.getProfesional() == null || cita.getProfesional().getId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Debe asignar un profesional válido a la cita.");
+        }
+
         Cita nuevaCita = citaService.guardarCita(cita);
-        return ResponseEntity.ok(nuevaCita);
+        CitaResponseDTO dto = citaMapper.citaToCitaResponseDTO(nuevaCita);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
-    // 🔹 Actualizar una cita
-    @Operation(summary = "Actualizar una cita")
-    @PutMapping("/{id}")
-    public ResponseEntity<Cita> actualizarCita(@PathVariable Long id, @RequestBody Cita cita) {
-        if (!citaService.buscarCitaPorId(id).isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-        cita.setId(id);
-        return ResponseEntity.ok(citaService.guardarCita(cita));
-    }
 
-    // 🔹 Eliminar una cita
-    @Operation(summary = "Eliminar una cita")
+    // 🔹 Eliminar una cita (solo admin)
+    @Operation(summary = "Eliminar cita por ID")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarCita(@PathVariable Long id) {
-        if (!citaService.buscarCitaPorId(id).isPresent()) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> eliminarCita(@PathVariable Long id, Authentication auth) {
+        if (!tieneRolAdmin(auth)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo un administrador puede eliminar citas.");
         }
+
+        Optional<Cita> cita = citaService.buscarCitaPorId(id);
+        if (cita.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cita no encontrada.");
+        }
+
         citaService.eliminarCita(id);
         return ResponseEntity.noContent().build();
     }
 
-    // 🔹 Buscar citas por profesional
-    @Operation(summary = "Buscar citas por profesional")
-    @GetMapping("/profesional/{id}")
-    public ResponseEntity<List<Cita>> buscarPorProfesional(@PathVariable Long id) {
-        return ResponseEntity.ok(citaService.buscarPorProfesional(id));
+    // === Métodos privados para reutilizar lógica ===
+
+    private Usuario obtenerUsuarioAutenticado(Authentication auth) {
+        String username = auth.getName();
+        return usuarioService.findByUsername(username).orElse(null);
     }
 
-    // 🔹 Buscar citas por usuario
-    @Operation(summary = "Buscar citas por usuario")
-    @GetMapping("/usuario/{id}")
-    public ResponseEntity<List<Cita>> buscarPorUsuario(@PathVariable Long id) {
-        return ResponseEntity.ok(citaService.buscarPorUsuario(id));
+    private boolean tieneRolAdmin(Authentication auth) {
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    private boolean tieneRolProfesional(Authentication auth) {
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_PROFESIONAL"));
     }
 }

@@ -33,12 +33,17 @@ public class ProfesionalServiceImpl implements ProfesionalService {
 
     @Override
     public List<Profesional> buscarPorEspecialidad(Especialidad especialidad) {
-        return profesionalRepository.buscarPorEspecialidad(especialidad);
+        return profesionalRepository.findByEspecialidad(especialidad);
     }
 
     @Override
     public List<Profesional> buscarPorCiudad(String ciudad) {
-        return profesionalRepository.buscarPorCiudad(ciudad);
+        return profesionalRepository.findByCiudadIgnoreCase(ciudad);
+    }
+
+     @Override
+    public Optional<Profesional> buscarPorDni(String dni) {
+        return profesionalRepository.findByDni(dni);
     }
 
     @Override
@@ -49,5 +54,10 @@ public class ProfesionalServiceImpl implements ProfesionalService {
     @Override
     public void eliminarProfesional(Long id) {
         profesionalRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<Profesional> buscarPorEmail(String email) {
+        return profesionalRepository.findByEmail(email);
     }
 }

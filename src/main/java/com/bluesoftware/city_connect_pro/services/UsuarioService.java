@@ -13,5 +13,6 @@ public interface UsuarioService {
     void eliminarUsuario(Long id);
     Usuario buscarPorEmail(String email);
     Usuario buscarPorDni(String dni);
+    Optional<Usuario> findByUsername(String username);
     boolean existsByUsername(String username);
 }

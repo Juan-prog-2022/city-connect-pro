@@ -18,10 +18,6 @@ public class Cita {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDateTime fechaHora;  // Puedes usar LocalDateTime si prefieres trabajar con objetos de fecha/hora
-
-    @Column(nullable = false)
     private Integer duracion;  // Duración de la cita en minutos
 
     @Enumerated(EnumType.STRING)
@@ -47,8 +43,9 @@ public class Cita {
 
     private String linkReunion;  // Enlace de la reunión si es online (Zoom, Meet, etc.)
 
-    private String fechaCreacion;  // Fecha de creación de la cita
+    @Column(nullable = false)
+    private LocalDateTime fechaHora;  // Puedes usar LocalDateTime si prefieres trabajar con objetos de fecha/hora
 
-    private String fechaCancelacion;  // Fecha de cancelación (si aplica)
+    private LocalDateTime fechaCancelacion;  // Fecha de cancelación (si aplica)
 
 }
