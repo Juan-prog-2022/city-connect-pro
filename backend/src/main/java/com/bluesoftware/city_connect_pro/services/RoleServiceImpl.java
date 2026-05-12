@@ -1,6 +1,7 @@
 package com.bluesoftware.city_connect_pro.services;
 
 import com.bluesoftware.city_connect_pro.entities.Role;
+import com.bluesoftware.city_connect_pro.entities.RoleName;
 import com.bluesoftware.city_connect_pro.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ public class RoleServiceImpl implements RoleService {
     private RoleRepository roleRepository;
 
     @Override
-    public Optional<Role> buscarPorNombre(String nombre) {
-        return roleRepository.findByName(nombre.toUpperCase());
+    public Optional<Role> buscarPorNombre(RoleName nombre) {
+        return roleRepository.findByName(nombre);
     }
 }
