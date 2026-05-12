@@ -1,0 +1,18 @@
+package com.bluesoftware.city_connect_pro.entities;
+
+public enum PermissionName {
+    USER_READ,
+    USER_CREATE,
+    USER_UPDATE,
+    USER_DELETE,
+
+    PROFESSIONAL_READ,
+    PROFESSIONAL_CREATE,
+    PROFESSIONAL_UPDATE,
+    PROFESSIONAL_DELETE,
+
+    APPOINTMENT_READ,
+    APPOINTMENT_CREATE,
+    APPOINTMENT_UPDATE,
+    APPOINTMENT_DELETE
+}

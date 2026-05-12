@@ -1,12 +1,10 @@
-package com.bluesoftware.city_connect_pro.repositories;
+package com.bluesoftware.city_connect_pro.services;
 
 import com.bluesoftware.city_connect_pro.entities.Role;
 import com.bluesoftware.city_connect_pro.entities.RoleName;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Optional;
 
-public interface RoleRepository extends JpaRepository<Role, Long> {
+public interface IRoleService {
     Optional<Role> findByName(RoleName name);
 }
