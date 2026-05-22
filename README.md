@@ -75,8 +75,17 @@
 
 ![Reviews Dashboard](./screenshots/dashboard_reviews.png)
 
-🔗 Demo
-👉 Ver Demo
+## 🚀 Live Demo
+
+### Frontend
+https://city-connect-pro.vercel.app
+
+### Backend API
+https://city-connect-pro.onrender.com
+
+### Swagger Documentation
+https://city-connect-pro.onrender.com/swagger-ui.html
+
 
 🧑‍💻 Autor
 Juan Quiroz
