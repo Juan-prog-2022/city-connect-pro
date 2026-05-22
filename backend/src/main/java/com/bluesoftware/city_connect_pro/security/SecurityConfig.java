@@ -31,118 +31,130 @@ import com.bluesoftware.city_connect_pro.security.filters.JwtAuthorizationFilter
 import com.bluesoftware.city_connect_pro.security.filters.JwtAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity 
+@EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired    
-    private CustomUserDetailsService userDetailsService;
+        @Autowired
+        private CustomUserDetailsService userDetailsService;
 
-    @Autowired
-    private JwtService jwtService;
+        @Autowired
+        private JwtService jwtService;
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    @Value("${frontend.url}")
-    private String frontendUrl;
+        @Value("${frontend.url}")
+        private String frontendUrl;
 
-    // =====================================================
-    // PASSWORD ENCODER
-    // =====================================================
+        // =====================================================
+        // PASSWORD ENCODER
+        // =====================================================
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                frontendUrl,
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "https://city-connect-pro.vercel.app"
-        ));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
-        configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setAllowCredentials(false);
+        @Bean
+        CorsConfigurationSource corsConfigurationSource() {
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+                CorsConfiguration configuration = new CorsConfiguration();
 
-    @Bean
-    AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder);
-        return new ProviderManager(provider);
-    }
+                configuration.setAllowedOrigins(List.of(
+                                frontendUrl,
+                                "http://localhost:5173",
+                                "http://127.0.0.1:5173",
+                                "https://city-connect-pro.vercel.app"));
 
-    // =====================================================
-    // SECURITY FILTER CHAIN
-    // =====================================================
+                configuration.setAllowedMethods(List.of(
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE",
+                                "OPTIONS"));
 
-    @Bean
-    SecurityFilterChain filterChain(
-            HttpSecurity http,
-            AuthenticationManager authenticationManager
-    ) throws Exception {
+                configuration.setAllowedHeaders(List.of("*"));
 
-        return http
+                configuration.setExposedHeaders(List.of("Authorization"));
 
-                // =========================================
-                // CSRF
-                // =========================================
+                configuration.setAllowCredentials(false);
 
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-                // =========================================
-                // SESSION
-                // =========================================
+                source.registerCorsConfiguration("/**", configuration);
 
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                return source;
+        }
 
-                // =========================================
-                // AUTHORIZATION
-                // =========================================
+        @Bean
+        AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder) {
+                DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+                provider.setPasswordEncoder(passwordEncoder);
+                return new ProviderManager(provider);
+        }
 
-                .authorizeHttpRequests(auth -> auth
+        // =====================================================
+        // SECURITY FILTER CHAIN
+        // =====================================================
 
-                        // PUBLIC ENDPOINTS
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/api/webhooks/**"
-                        ).permitAll()
+        @Bean
+        SecurityFilterChain filterChain(
+                        HttpSecurity http,
+                        AuthenticationManager authenticationManager) throws Exception {
 
-                        // SWAGGER / OPENAPI (springdoc)
-                        .requestMatchers(
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs",
-                                "/v3/api-docs/**",
-                                "/webjars/**"
-                        ).permitAll()
+                return http
 
-                        // OPTIONS (CORS)
-                        .requestMatchers(HttpMethod.OPTIONS, "/**")
-                        .permitAll()
+                                // =========================================
+                                // CSRF
+                                // =========================================
 
-                        // EVERYTHING ELSE
-                        .anyRequest()
-                        .authenticated()
-                )
-                
-                .authenticationManager(authenticationManager)
-                .addFilterBefore(new JwtAuthorizationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
-                .addFilter(new JwtAuthenticationFilter(authenticationManager, jwtService, userRepository))
-                .build();
-    }
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .csrf(csrf -> csrf.disable())
+
+                                // =========================================
+                                // SESSION
+                                // =========================================
+
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                                // =========================================
+                                // AUTHORIZATION
+                                // =========================================
+
+                                .authorizeHttpRequests(auth -> auth
+
+                                                // PUBLIC ENDPOINTS
+                                                .requestMatchers(
+                                                                "/api/auth/**",
+                                                                "/api/webhooks/**")
+                                                .permitAll()
+
+                                                // SWAGGER / OPENAPI (springdoc)
+                                                .requestMatchers(
+                                                                "/swagger-ui.html",
+                                                                "/swagger-ui/**",
+                                                                "/v3/api-docs",
+                                                                "/v3/api-docs/**",
+                                                                "/webjars/**")
+                                                .permitAll()
+
+                                                // OPTIONS (CORS)
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**")
+                                                .permitAll()
+
+                                                // EVERYTHING ELSE
+                                                .anyRequest()
+                                                .authenticated())
+
+                                .authenticationManager(authenticationManager)
+                                .addFilterBefore(new JwtAuthorizationFilter(jwtService),
+                                                UsernamePasswordAuthenticationFilter.class)
+                                .addFilter(new JwtAuthenticationFilter(authenticationManager, jwtService,
+                                                userRepository))
+                                .build();
+        }
 }
