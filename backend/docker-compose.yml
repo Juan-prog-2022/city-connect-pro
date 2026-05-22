@@ -1,0 +1,16 @@
+services:
+  backend:
+    build: .
+    container_name: city-connect-backend
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
+
+    restart: unless-stopped
