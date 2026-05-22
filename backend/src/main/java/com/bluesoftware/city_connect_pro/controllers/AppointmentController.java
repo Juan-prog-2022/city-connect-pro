@@ -21,6 +21,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -98,6 +99,28 @@ public class AppointmentController {
     ) {
 
         return appointmentService.getAllAppointments(pageable)
+                .map(AppointmentMapper::toResponse);
+    }
+
+    @Operation(summary = "Get current professional appointments")
+    @GetMapping("/professional/me")
+    @PreAuthorize("hasRole('PRO')")
+    public Page<AppointmentResponseDTO> getMyProfessionalAppointments(
+            Authentication authentication,
+            @PageableDefault(size = 10, sort = "appointmentDateTime") Pageable pageable
+    ) {
+        return appointmentService.getAppointmentsByProfessionalUsername(authentication.getName(), pageable)
+                .map(AppointmentMapper::toResponse);
+    }
+
+    @Operation(summary = "Get current client appointments")
+    @GetMapping("/client/me")
+    @PreAuthorize("hasRole('USER')")
+    public Page<AppointmentResponseDTO> getMyClientAppointments(
+            Authentication authentication,
+            @PageableDefault(size = 10, sort = "appointmentDateTime") Pageable pageable
+    ) {
+        return appointmentService.getAppointmentsByClientUsername(authentication.getName(), pageable)
                 .map(AppointmentMapper::toResponse);
     }
 
@@ -185,5 +208,12 @@ public class AppointmentController {
     ) {
 
         appointmentService.cancelAppointment(id);
+    }
+
+    @Operation(summary = "Complete appointment")
+    @PatchMapping("/{id}/complete")
+    @PreAuthorize("hasRole('PRO') or hasRole('ADMIN')")
+    public AppointmentResponseDTO complete(@PathVariable Long id) {
+        return AppointmentMapper.toResponse(appointmentService.completeAppointment(id));
     }
 }

@@ -5,6 +5,8 @@ import com.bluesoftware.city_connect_pro.mapper.*;
 import com.bluesoftware.city_connect_pro.services.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -17,6 +19,7 @@ public class UserController {
     private IUserService userService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('USER_READ')")
     public List<UserResponseDTO> getAll() {
         return userService.getAllUsers()
                 .stream()
@@ -25,6 +28,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('USER_READ')")
     public UserResponseDTO getById(@PathVariable Long id) {
         return userService.getUserById(id)
                 .map(UserMapper::toResponse)
@@ -32,6 +36,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('USER_DELETE')")
     public void delete(@PathVariable Long id) {
         userService.deleteUser(id);
     }

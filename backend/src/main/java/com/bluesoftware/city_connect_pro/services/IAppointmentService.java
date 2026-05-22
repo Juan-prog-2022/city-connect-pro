@@ -32,14 +32,23 @@ public interface IAppointmentService {
     // ❌ Cancelar turno (no borrar físicamente)
     void cancelAppointment(Long id);
 
+    // ✅ Marcar turno como completado
+    Appointment completeAppointment(Long id);
+
     // 🗑️ (opcional) eliminar físico
     void deleteAppointment(Long id);
 
     // 🔍 Por profesional (paginado)
     Page<Appointment> getAppointmentsByProfessional(Long professionalId, Pageable pageable);
 
+    // 🔍 Por usuario profesional autenticado
+    Page<Appointment> getAppointmentsByProfessionalUsername(String username, Pageable pageable);
+
     // 🔍 Por cliente (paginado)
     Page<Appointment> getAppointmentsByClient(Long clientId, Pageable pageable);
+
+    // 🔍 Por cliente autenticado
+    Page<Appointment> getAppointmentsByClientUsername(String username, Pageable pageable);
 
     // 🔍 Filtrar por estado
     Page<Appointment> getAppointmentsByClientAndStatus(

@@ -30,6 +30,9 @@ public class ProfessionalRequestDTO {
     private String city;
     private String address;
 
+    private Double latitude;
+    private Double longitude;
+
     @DecimalMin("0.0")
     private BigDecimal hourlyRate;
 

@@ -10,6 +10,7 @@ import com.bluesoftware.city_connect_pro.entities.RoleName;
 import com.bluesoftware.city_connect_pro.entities.User;
 import com.bluesoftware.city_connect_pro.repositories.RoleRepository;
 import com.bluesoftware.city_connect_pro.repositories.UserRepository;
+import com.bluesoftware.city_connect_pro.security.JwtService;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -26,8 +27,10 @@ public class AuthServiceImpl implements IAuthService {
     private RoleRepository roleRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private JwtService jwtService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -55,7 +58,7 @@ public class AuthServiceImpl implements IAuthService {
         user.setLastName(request.getLastName());
         user.setDni(request.getDni());
         user.setEmail(request.getEmail().toLowerCase().trim());
-        user.setUsername(request.getUsername().trim());
+        user.setUsername(request.getUsername().trim().toLowerCase());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         user.setRoles(Set.of(roleUser));
@@ -89,9 +92,13 @@ public class AuthServiceImpl implements IAuthService {
                 .map(role -> role.getName().name())
                 .collect(Collectors.toSet());
 
+        String token = jwtService.generateToken(user);
+
         return AuthResponse.builder()
+                .token(token)
                 .message("Login successful")
                 .username(user.getUsername())
+                .userId(user.getId())
                 .roles(roles)
                 .build();
     }

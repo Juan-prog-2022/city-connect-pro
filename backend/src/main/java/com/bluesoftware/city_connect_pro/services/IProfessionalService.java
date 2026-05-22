@@ -11,9 +11,13 @@ public interface IProfessionalService {
 
     Optional<Professional> getById(Long id);
 
+    Optional<Professional> getByUsername(String username);
+
     Professional create(Professional professional);
 
     Professional update(Long id, Professional professional);
 
     void delete(Long id);
+
+    List<Professional> findNearby(double latitude, double longitude, double radiusKm);
 }
