@@ -28,26 +28,42 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain
-    ) throws ServletException, IOException {
-        String authorizationHeader = request.getHeader(JwtConstants.AUTHORIZATION_HEADER);
+            FilterChain filterChain) throws ServletException, IOException {
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authorizationHeader.substring(JwtConstants.TOKEN_PREFIX.length());
+        String authorizationHeader = request.getHeader(JwtConstants.AUTHORIZATION_HEADER);
+
+        if (authorizationHeader == null ||
+                !authorizationHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String token = authorizationHeader.substring(
+                JwtConstants.TOKEN_PREFIX.length());
 
         try {
+
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     jwtService.extractUsername(token),
                     null,
                     jwtService.extractAuthorities(token));
 
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            authentication.setDetails(
+                    new WebAuthenticationDetailsSource()
+                            .buildDetails(request));
+
+            SecurityContextHolder.getContext()
+                    .setAuthentication(authentication);
+
         } catch (JwtException | IllegalArgumentException exception) {
+
             SecurityContextHolder.clearContext();
         }
 
