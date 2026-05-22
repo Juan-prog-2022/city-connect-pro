@@ -36,11 +36,35 @@
 
 ---
 
-## 📸 Captura
+# 📊 Dashboards
 
-![Vista previa](./public/img/city-connect.png)
+### Client Dashboard
+
+![Client Dashboard](./screenshots/dashboard_client.png)
 
 ---
+
+### Professional Dashboard
+
+![Professional Dashboard](./screenshots/dashboard_pro.png)
+
+---
+
+### Appointments Dashboard
+
+![Appointments Dashboard](./screenshots/dashboard_turnos.png)
+
+---
+
+### Users Dashboard
+
+![Users Dashboard](./screenshots/dashboard_users.png)
+
+---
+
+### Reviews Dashboard
+
+![Reviews Dashboard](./screenshots/dashboard_reviews.png)
 
 🔗 Demo
 👉 Ver Demo
