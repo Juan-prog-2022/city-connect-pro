@@ -1,13 +1,7 @@
 package com.bluesoftware.city_connect_pro.config;
 
-import com.bluesoftware.city_connect_pro.entities.Permission;
-import com.bluesoftware.city_connect_pro.entities.PermissionName;
-import com.bluesoftware.city_connect_pro.entities.Role;
-import com.bluesoftware.city_connect_pro.entities.RoleName;
-import com.bluesoftware.city_connect_pro.entities.User;
-import com.bluesoftware.city_connect_pro.repositories.PermissionRepository;
-import com.bluesoftware.city_connect_pro.repositories.RoleRepository;
-import com.bluesoftware.city_connect_pro.repositories.UserRepository;
+import com.bluesoftware.city_connect_pro.entities.*;
+import com.bluesoftware.city_connect_pro.repositories.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 @Configuration
@@ -26,6 +22,7 @@ public class DataInitializer {
         private final PermissionRepository permissionRepository;
         private final RoleRepository roleRepository;
         private final UserRepository userRepository;
+        private final ProfessionalRepository professionalRepository;
         private final PasswordEncoder passwordEncoder;
 
         @Bean
@@ -122,6 +119,7 @@ public class DataInitializer {
                                                         appointmentRead,
                                                         appointmentCreate,
                                                         appointmentUpdate,
+
                                                         reviewRead,
                                                         paymentRead));
 
@@ -129,7 +127,7 @@ public class DataInitializer {
                         // CREATE USERS
                         // =====================================================
 
-                        createUserIfNotExists(
+                        User admin = createUserIfNotExists(
                                         "Admin",
                                         "Principal",
                                         "30111222",
@@ -140,29 +138,110 @@ public class DataInitializer {
                                         "admin123",
                                         Set.of(roleAdmin));
 
-                        createUserIfNotExists(
-                                        "Usuario",
-                                        "Normal",
+                        User user = createUserIfNotExists(
+                                        "Juan",
+                                        "Perez",
                                         "32111333",
-                                        "user@test.com",
-                                        "user",
+                                        "juan@test.com",
+                                        "juan",
                                         "3815552222",
-                                        "Salta, Salta",
+                                        "Salta Capital",
                                         "user12345",
                                         Set.of(roleUser));
 
-                        createUserIfNotExists(
-                                        "Profesional",
-                                        "Demo",
+                        User professionalUser = createUserIfNotExists(
+                                        "Ana",
+                                        "Lopez",
                                         "34111444",
-                                        "pro@test.com",
+                                        "ana@test.com",
                                         "professional",
                                         "3815553333",
-                                        "Av. Tartagal, Salta",
+                                        "Tartagal, Salta",
                                         "pro12345",
                                         Set.of(rolePro));
 
-                        System.out.println("✅ Initial data loaded successfully");
+                        // =====================================================
+                        // CREATE PROFESSIONAL PROFILE
+                        // =====================================================
+
+                        createProfessionalIfNotExists(
+                                        "30111222",
+                                        "Ana",
+                                        "Lopez",
+                                        "ana@test.com",
+                                        "3873511122",
+                                        "Tartagal",
+                                        "Av. Alberdi 455",
+                                        -22.5165,
+                                        -63.8013,
+                                        Specialty.PSYCHOLOGIST,
+                                        List.of(
+                                                        "Terapia Cognitiva",
+                                                        "Ansiedad",
+                                                        "Depresión"),
+                                        List.of(
+                                                        "Universidad Nacional de Salta",
+                                                        "Colegio de Psicólogos"),
+                                        "Lunes a Viernes 08:00 - 18:00",
+                                        new BigDecimal("15000"),
+                                        CurrencyType.ARS,
+                                        8,
+                                        "Psicóloga especializada en terapia cognitivo conductual.",
+                                        true,
+                                        "https://i.pravatar.cc/300?img=12",
+                                        null);
+
+                        createProfessionalIfNotExists(
+                                        "30999888",
+                                        "Diego",
+                                        "Herrera",
+                                        "diego@test.com",
+                                        "3873514455",
+                                        "Tartagal",
+                                        "San Martín 220",
+                                        -22.5200,
+                                        -63.7990,
+                                        Specialty.ELECTRICIAN,
+                                        List.of(
+                                                        "Instalaciones",
+                                                        "Cableado",
+                                                        "Domótica"),
+                                        List.of(
+                                                        "Técnico Electricista Matriculado"),
+                                        "Lunes a Sábado 09:00 - 20:00",
+                                        new BigDecimal("22000"),
+                                        CurrencyType.ARS,
+                                        12,
+                                        "Electricista con experiencia en instalaciones residenciales.",
+                                        true,
+                                        "https://i.pravatar.cc/300?img=15",
+                                        null);
+
+                        createProfessionalIfNotExists(
+                                        "32222333",
+                                        "Valentina",
+                                        "Rios",
+                                        "valentina@test.com",
+                                        "3873519988",
+                                        "Tartagal",
+                                        "Belgrano 880",
+                                        -22.5188,
+                                        -63.8035,
+                                        Specialty.NUTRITIONIST,
+                                        List.of(
+                                                        "Nutrición Deportiva",
+                                                        "Planes Alimenticios"),
+                                        List.of(
+                                                        "Licenciatura en Nutrición"),
+                                        "Lunes a Viernes 10:00 - 17:00",
+                                        new BigDecimal("18000"),
+                                        CurrencyType.ARS,
+                                        5,
+                                        "Nutricionista especializada en rendimiento deportivo.",
+                                        true,
+                                        "https://i.pravatar.cc/300?img=25",
+                                        null);
+
                 };
         }
 
@@ -217,7 +296,7 @@ public class DataInitializer {
         // CREATE USER
         // =====================================================
 
-        private void createUserIfNotExists(
+        private User createUserIfNotExists(
                         String firstName,
                         String lastName,
                         String dni,
@@ -228,28 +307,111 @@ public class DataInitializer {
                         String rawPassword,
                         Set<Role> roles) {
 
-                if (userRepository.existsByUsername(username)) {
+                return userRepository.findByUsername(username)
+                                .orElseGet(() -> {
+
+                                        User user = new User();
+
+                                        user.setFirstName(firstName);
+                                        user.setLastName(lastName);
+                                        user.setDni(dni);
+
+                                        user.setEmail(email.toLowerCase().trim());
+                                        user.setUsername(username.toLowerCase().trim());
+
+                                        user.setPhone(phone);
+                                        user.setAddress(address);
+
+                                        user.setPassword(
+                                                        passwordEncoder.encode(rawPassword));
+
+                                        user.setActive(true);
+
+                                        user.setRoles(roles);
+
+                                        return userRepository.save(user);
+                                });
+        }
+
+        // =====================================================
+        // CREATE PROFESSIONAL
+        // =====================================================
+
+        private void createProfessionalIfNotExists(
+                        String dni,
+                        String firstName,
+                        String lastName,
+                        String email,
+                        String phone,
+                        String city,
+                        String address,
+                        Double latitude,
+                        Double longitude,
+                        Specialty specialty,
+                        List<String> skills,
+                        List<String> certifications,
+                        String availability,
+                        BigDecimal hourlyRate,
+                        CurrencyType currency,
+                        int yearsOfExperience,
+                        String experienceDescription,
+                        Boolean verified,
+                        String profileImage,
+                        String introVideo) {
+
+                boolean exists = professionalRepository
+                                .findByEmail(email)
+                                .isPresent();
+
+                if (exists) {
                         return;
                 }
 
-                User user = new User();
+                Professional professional = new Professional();
 
-                user.setFirstName(firstName);
-                user.setLastName(lastName);
-                user.setDni(dni);
+                professional.setDni(dni);
 
-                user.setEmail(email.toLowerCase().trim());
-                user.setUsername(username.toLowerCase().trim());
-                user.setPhone(phone);
-                user.setAddress(address);
+                professional.setFirstName(firstName);
+                professional.setLastName(lastName);
 
-                user.setPassword(
-                                passwordEncoder.encode(rawPassword));
+                professional.setEmail(email.toLowerCase().trim());
 
-                user.setActive(true);
+                professional.setPhone(phone);
 
-                user.setRoles(roles);
+                professional.setCity(city);
+                professional.setAddress(address);
 
-                userRepository.save(user);
+                professional.setLatitude(latitude);
+                professional.setLongitude(longitude);
+
+                professional.setSpecialty(specialty);
+
+                professional.setSkills(skills);
+
+                professional.setCertifications(certifications);
+
+                professional.setAvailability(availability);
+
+                professional.setHourlyRate(hourlyRate);
+
+                professional.setCurrency(currency);
+
+                professional.setYearsOfExperience(yearsOfExperience);
+
+                professional.setExperienceDescription(experienceDescription);
+
+                professional.setAverageRating(BigDecimal.ZERO);
+
+                professional.setReviewCount(0);
+
+                professional.setActive(true);
+
+                professional.setVerified(verified);
+
+                professional.setProfileImage(profileImage);
+
+                professional.setIntroVideo(introVideo);
+
+                professionalRepository.save(professional);
         }
 }
