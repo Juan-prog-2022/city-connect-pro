@@ -124,6 +124,24 @@ public class AppointmentServiceImpl implements IAppointmentService {
         appointmentRepository.save(appointment);
     }
 
+    @Override
+    @Transactional
+    public Appointment completeAppointment(Long id) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
+
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new IllegalStateException("Cancelled appointments cannot be completed");
+        }
+
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new IllegalStateException("Appointment already completed");
+        }
+
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+        return appointmentRepository.save(appointment);
+    }
+
     // 🗑️ Delete físico (opcional)
     @Override
     public void deleteAppointment(Long id) {
@@ -139,10 +157,29 @@ public class AppointmentServiceImpl implements IAppointmentService {
         return appointmentRepository.findByProfessionalId(professionalId, pageable);
     }
 
+    @Override
+    public Page<Appointment> getAppointmentsByProfessionalUsername(String username, Pageable pageable) {
+        User user = userRepository.findByUsernameOrEmail(username, username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        Professional professional = professionalRepository.findByEmail(user.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException("Professional profile not found"));
+
+        return appointmentRepository.findByProfessionalId(professional.getId(), pageable);
+    }
+
     // 🔍 Por cliente
     @Override
     public Page<Appointment> getAppointmentsByClient(Long clientId, Pageable pageable) {
         return appointmentRepository.findByClientId(clientId, pageable);
+    }
+
+    @Override
+    public Page<Appointment> getAppointmentsByClientUsername(String username, Pageable pageable) {
+        User user = userRepository.findByUsernameOrEmail(username, username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        return appointmentRepository.findByClientId(user.getId(), pageable);
     }
 
     // 🔍 Por estado

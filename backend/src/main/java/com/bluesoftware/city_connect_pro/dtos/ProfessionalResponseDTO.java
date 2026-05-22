@@ -21,6 +21,8 @@ public class ProfessionalResponseDTO {
 
     private String city;
     private String address;
+    private Double latitude;
+    private Double longitude;
 
     private BigDecimal hourlyRate;
     private String currency;

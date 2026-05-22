@@ -19,7 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Arrays;
 import java.util.Set;
 
-//@Configuration
+@Configuration
 @RequiredArgsConstructor
 public class DataInitializer {
 
@@ -59,11 +59,20 @@ public class DataInitializer {
                         Permission appointmentUpdate = getPermission(PermissionName.APPOINTMENT_UPDATE);
                         Permission appointmentDelete = getPermission(PermissionName.APPOINTMENT_DELETE);
 
+                        Permission reviewRead = getPermission(PermissionName.REVIEW_READ);
+                        Permission reviewCreate = getPermission(PermissionName.REVIEW_CREATE);
+                        Permission reviewUpdate = getPermission(PermissionName.REVIEW_UPDATE);
+                        Permission reviewDelete = getPermission(PermissionName.REVIEW_DELETE);
+
+                        Permission paymentRead = getPermission(PermissionName.PAYMENT_READ);
+                        Permission paymentCreate = getPermission(PermissionName.PAYMENT_CREATE);
+                        Permission paymentUpdate = getPermission(PermissionName.PAYMENT_UPDATE);
+
                         // =====================================================
                         // CREATE ROLES
                         // =====================================================
 
-                        Role roleAdmin = createRoleIfNotExists(
+                        Role roleAdmin = createOrUpdateRole(
                                         RoleName.ROLE_ADMIN,
                                         Set.of(
                                                         userRead,
@@ -79,17 +88,31 @@ public class DataInitializer {
                                                         appointmentRead,
                                                         appointmentCreate,
                                                         appointmentUpdate,
-                                                        appointmentDelete));
+                                                        appointmentDelete,
 
-                        Role roleUser = createRoleIfNotExists(
+                                                        reviewRead,
+                                                        reviewCreate,
+                                                        reviewUpdate,
+                                                        reviewDelete,
+
+                                                        paymentRead,
+                                                        paymentCreate,
+                                                        paymentUpdate));
+
+                        Role roleUser = createOrUpdateRole(
                                         RoleName.ROLE_USER,
                                         Set.of(
                                                         userRead,
                                                         userUpdate,
+                                                        professionalRead,
                                                         appointmentRead,
-                                                        appointmentCreate));
+                                                        appointmentCreate,
+                                                        reviewRead,
+                                                        reviewCreate,
+                                                        paymentRead,
+                                                        paymentCreate));
 
-                        Role rolePro = createRoleIfNotExists(
+                        Role rolePro = createOrUpdateRole(
                                         RoleName.ROLE_PRO,
                                         Set.of(
                                                         professionalRead,
@@ -98,7 +121,9 @@ public class DataInitializer {
 
                                                         appointmentRead,
                                                         appointmentCreate,
-                                                        appointmentUpdate));
+                                                        appointmentUpdate,
+                                                        reviewRead,
+                                                        paymentRead));
 
                         // =====================================================
                         // CREATE USERS
@@ -171,18 +196,19 @@ public class DataInitializer {
         // CREATE ROLE
         // =====================================================
 
-        private Role createRoleIfNotExists(
+        private Role createOrUpdateRole(
                         RoleName roleName,
                         Set<Permission> permissions) {
 
                 return roleRepository.findByName(roleName)
+                                .map(role -> {
+                                        role.setPermissions(permissions);
+                                        return roleRepository.save(role);
+                                })
                                 .orElseGet(() -> {
-
                                         Role role = new Role();
-
                                         role.setName(roleName);
                                         role.setPermissions(permissions);
-
                                         return roleRepository.save(role);
                                 });
         }

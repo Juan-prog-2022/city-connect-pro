@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.bluesoftware.city_connect_pro.entities.Professional;
 import com.bluesoftware.city_connect_pro.repositories.ProfessionalRepository;
+import com.bluesoftware.city_connect_pro.repositories.UserRepository;
 
 
 @Service
@@ -15,6 +16,9 @@ public class ProfessionalServiceImpl implements IProfessionalService {
 
     @Autowired
     private ProfessionalRepository repository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public List<Professional> getAll() {
@@ -24,6 +28,12 @@ public class ProfessionalServiceImpl implements IProfessionalService {
     @Override
     public Optional<Professional> getById(Long id) {
         return repository.findById(id);
+    }
+
+    @Override
+    public Optional<Professional> getByUsername(String username) {
+        return userRepository.findByUsernameOrEmail(username, username)
+                .flatMap(user -> repository.findByEmail(user.getEmail()));
     }
 
     @Override
@@ -43,6 +53,8 @@ public class ProfessionalServiceImpl implements IProfessionalService {
         p.setPhone(data.getPhone());
         p.setCity(data.getCity());
         p.setAddress(data.getAddress());
+        p.setLatitude(data.getLatitude());
+        p.setLongitude(data.getLongitude());
 
         return repository.save(p);
     }
@@ -50,5 +62,10 @@ public class ProfessionalServiceImpl implements IProfessionalService {
     @Override
     public void delete(Long id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    public List<Professional> findNearby(double latitude, double longitude, double radiusKm) {
+        return repository.findNearby(latitude, longitude, radiusKm);
     }
 }
