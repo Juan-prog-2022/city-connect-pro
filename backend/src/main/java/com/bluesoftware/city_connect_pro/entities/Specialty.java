@@ -4,6 +4,8 @@ public enum Specialty {
 
     LAWYER("Lawyer"),
     ACCOUNTANT("Accountant"),
+    ELECTRICIAN("Electrician"),
+    PLUMBER("Plumber"),
     NOTARY("Notary"),
     NURSE("Nurse"),
     PRIMARY_TUTOR("Primary School Tutor"),
