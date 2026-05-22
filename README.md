@@ -38,9 +38,18 @@
 
 # 📊 Dashboards
 
-### Client Dashboard
+### Client Register
 
-![Client Dashboard](./screenshots/dashboard_client.png)
+![Client Dashboard](./screenshots/register_client.png)
+
+---
+### Register Pro
+
+![Client Dashboard](./screenshots/register_pro.png)
+
+### Login Dashboard
+
+![Client Dashboard](./screenshots/login_admin.png)
 
 ---
 
