@@ -63,10 +63,8 @@ public class SecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
 
                 configuration.setAllowedOrigins(List.of(
-                                frontendUrl,
-                                "http://localhost:5173",
-                                "http://127.0.0.1:5173",
-                                "https://city-connect-pro.vercel.app"));
+                                "https://city-connect-pro.vercel.app",
+                                "http://localhost:5173"));
 
                 configuration.setAllowedMethods(List.of(
                                 "GET",
@@ -80,7 +78,7 @@ public class SecurityConfig {
 
                 configuration.setExposedHeaders(List.of("Authorization"));
 
-                configuration.setAllowCredentials(false);
+                configuration.setAllowCredentials(true);
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
