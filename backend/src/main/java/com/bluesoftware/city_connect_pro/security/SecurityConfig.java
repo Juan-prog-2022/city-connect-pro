@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -44,6 +45,9 @@ public class SecurityConfig {
     @Autowired
     private UserRepository userRepository;
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     // =====================================================
     // PASSWORD ENCODER
     // =====================================================
@@ -57,6 +61,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
+                frontendUrl,
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
                 "http://localhost:3000",
