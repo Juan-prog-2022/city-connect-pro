@@ -6,9 +6,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import com.bluesoftware.city_connect_pro.repositories.UserRepository;
 import com.bluesoftware.city_connect_pro.security.filters.JwtAuthorizationFilter;
@@ -71,8 +73,8 @@ public class SecurityConfig {
                                 "DELETE",
                                 "OPTIONS"));
 
+                configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
                 configuration.setAllowedHeaders(List.of("*"));
-
                 configuration.setExposedHeaders(List.of("Authorization"));
 
                 configuration.setAllowCredentials(true);
@@ -82,6 +84,13 @@ public class SecurityConfig {
                 source.registerCorsConfiguration("/**", configuration);
 
                 return source;
+        }
+
+        @Bean
+        FilterRegistrationBean<CorsFilter> corsFilter() {
+                FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource()));
+                bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+                return bean;
         }
 
         @Bean
