@@ -45,9 +45,6 @@ public class SecurityConfig {
         @Autowired
         private UserRepository userRepository;
 
-        @Value("${frontend.url}")
-        private String frontendUrl;
-
         // =====================================================
         // PASSWORD ENCODER
         // =====================================================

@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-@Configuration
+//@Configuration
 @RequiredArgsConstructor
 public class DataInitializer {
 
